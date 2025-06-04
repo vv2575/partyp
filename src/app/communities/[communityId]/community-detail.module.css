@@ -1,0 +1,203 @@
+.container {
+  padding: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: #fff;
+}
+
+.loadingContainer, .errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  font-size: 1.5rem;
+  color: #555;
+}
+
+.errorContainer {
+  color: #e74c3c;
+}
+
+.header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #eee;
+}
+
+.name {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.metaInfo {
+  font-size: 1rem;
+  color: #7f8c8d;
+  margin-bottom: 0.75rem;
+}
+
+.metaInfo span {
+  margin-right: 1rem;
+}
+
+.metaInfo strong {
+  color: #34495e;
+}
+
+.description {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #34495e;
+  margin-bottom: 2rem;
+  white-space: pre-wrap; /* Preserve line breaks in description */
+}
+
+.leaderInfo {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.leaderInfo strong {
+  color: #333;
+}
+
+.sectionTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-top: 2.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Styles for discussion section (Phase 1: basic posting) */
+.discussionForm {
+  margin-bottom: 2rem;
+}
+
+.discussionForm textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  box-sizing: border-box;
+}
+
+.discussionForm button {
+  padding: 0.6rem 1.2rem;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.discussionForm button:hover {
+  background-color: #2980b9;
+}
+
+.discussionForm button:disabled {
+  background-color: #aed6f1;
+  cursor: not-allowed;
+}
+
+.postList {
+  list-style: none;
+  padding: 0;
+}
+
+.postItem {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.postAuthor {
+  font-weight: bold;
+  color: #2980b9;
+  margin-bottom: 0.3rem;
+  font-size: 1.05rem;
+}
+
+.postContent {
+  font-size: 1rem;
+  color: #333;
+  white-space: pre-wrap; /* Preserve line breaks in post content */
+  margin-bottom: 0.5rem;
+}
+
+.postTimestamp {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.noPosts {
+  text-align: center;
+  color: #777;
+  padding: 1rem;
+  font-style: italic;
+}
+
+.joinButton {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+}
+
+.joinButton:hover {
+  background-color: #229954;
+}
+
+.joinButton:disabled {
+  background-color: #a5d6a7;
+  cursor: not-allowed;
+}
+
+.alreadyMemberText {
+  font-style: italic;
+  color: #555;
+  margin-top: 1rem;
+}
+
+.editCommunityButton {
+  display: inline-block;
+  padding: 0.7rem 1.4rem;
+  background-color: #546e7a; /* A neutral, slightly bluish-gray */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+  margin-left: 0.5rem; /* Add some space if next to another button */
+  text-decoration: none; /* For Link component */
+}
+
+.editCommunityButton:hover {
+  background-color: #455a64;
+}
+
+.editCommunityButton:disabled {
+  background-color: #b0bec5;
+  cursor: not-allowed;
+}
