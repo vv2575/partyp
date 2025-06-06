@@ -3,16 +3,29 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase'; // Assuming your firebase config is here
+import { collection, getDocs, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import type { Community } from '../../types/community'; // Use global Community type
+import styles from './communities-page.module.css'; // Import CSS module
 
-interface Community {
-  id: string;
-  name: string;
-  description: string;
-  type: string;
-  // Add other relevant fields
-}
+// SVG Icons (can be moved to a separate icons file if used elsewhere)
+const IconSearch = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+    <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+  </svg>
+);
+
+const IconUsers = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+    <path d="M7 8a3 3 0 100-6 3 3 0 000 6zM14.5 9a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM1.396 16.72a11.912 11.912 0 015.23-3.061 3.002 3.002 0 00-1.265.792 8.913 8.913 0 00-3.014 2.461.75.75 0 101.119.997 7.413 7.413 0 012.604-2.104A1.5 1.5 0 017 14.5h.001c.07 0 .14.008.209.024a4.5 4.5 0 011.89-.666 8.413 8.413 0 001.96.06A4.502 4.502 0 0113 14.5h.001a1.5 1.5 0 011.06.44 7.416 7.416 0 012.605 2.104.75.75 0 101.118-.997 8.912 8.912 0 00-3.013-2.461 3.002 3.002 0 00-1.266-.792 11.915 11.915 0 015.231 3.061.75.75 0 00.8-.997A13.416 13.416 0 007.001 12H7a13.415 13.415 0 00-6.404 3.723.75.75 0 00.8.997z" />
+  </svg>
+);
+
+const IconPlusCircle = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-11.25a.75.75 0 00-1.5 0v2.5h-2.5a.75.75 0 000 1.5h2.5v2.5a.75.75 0 001.5 0v-2.5h2.5a.75.75 0 000-1.5h-2.5v-2.5z" clipRule="evenodd" />
+    </svg>
+);
 
 const CommunitiesPage = () => {
   const [communities, setCommunities] = useState<Community[]>([]);
@@ -27,10 +40,11 @@ const CommunitiesPage = () => {
       try {
         const communitiesCollection = collection(db, 'communities');
         const communitySnapshot = await getDocs(communitiesCollection);
-        const communitiesList = communitySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...(doc.data() as Omit<Community, 'id'>),
-        }));
+        const communitiesList = communitySnapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => ({
+          // id: doc.id, // communityId from data is preferred if it exists and is the true ID
+          ...(doc.data() as Community),
+          communityId: doc.id, // Ensure communityId is the document ID
+        }));        
         setCommunities(communitiesList);
       } catch (err) {
         console.error('Error fetching communities:', err);
@@ -44,61 +58,83 @@ const CommunitiesPage = () => {
 
   const filteredCommunities = communities.filter(community =>
     community.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    community.description.toLowerCase().includes(searchTerm.toLowerCase())
+    (community.description && community.description.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Discover Communities</h1>
+    <div className={styles.pageContainer}>
+      <header className={styles.header}>
+        <h1 className={styles.pageTitle}>Explore Communities</h1>
+        <Link href="/communities/create" className={`${styles.button} ${styles.buttonAccent}`}>
+          <IconPlusCircle /> Create Community
+        </Link>
+      </header>
 
-      <div className="mb-6">
-        <input
-          type="text"
-          placeholder="Search communities by name or description..."
-          className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className={styles.searchSection}>
+        <div className={styles.searchInputContainer}>
+          <IconSearch />
+          <input
+            type="text"
+            placeholder="Search communities by name or description..."
+            className={styles.searchInput}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       {loading && (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        <div className={styles.loadingMessage}>
+          <div className={styles.spinner}></div>
+          <p>Loading communities...</p>
         </div>
       )}
 
       {error && (
-        <div className="text-center text-red-500 bg-red-100 p-4 rounded-lg">
+        <div className={styles.errorMessage}>
           <p>{error}</p>
         </div>
       )}
 
       {!loading && !error && filteredCommunities.length === 0 && (
-        <p className="text-center text-gray-600">No communities found. Try a different search or check back later!</p>
-      )}
-
-      {!loading && !error && filteredCommunities.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCommunities.map((community) => (
-            <Link href={`/communities/${community.id}`} key={community.id} legacyBehavior>
-              <a className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
-                <div className="p-6">
-                  <h2 className="text-xl font-semibold mb-2 text-blue-600 hover:text-blue-700">{community.name}</h2>
-                  <p className="text-gray-700 mb-3 text-sm h-20 overflow-hidden text-ellipsis">
-                    {community.description || 'No description available.'}
-                  </p>
-                  <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                    {community.type || 'General'}
-                  </span>
-                </div>
-              </a>
-            </Link>
-          ))}
+        <div className={styles.noResultsMessage}>
+          <p>{searchTerm ? `No communities found matching "${searchTerm}".` : 'No communities available yet. Why not create one?'}</p>
         </div>
       )}
 
-      {!loading && !error && communities.length > 0 && filteredCommunities.length === 0 && searchTerm !== '' && (
-         <p className="text-center text-gray-600 mt-6">No communities match your search term "{searchTerm}".</p>
+      {!loading && !error && filteredCommunities.length > 0 && (
+        <div className={styles.communitiesGrid}>
+          {filteredCommunities.map((community) => (
+            <Link key={community.communityId} href={`/communities/${community.communityId}`} className={styles.cardLink}>
+              <div className={styles.communityCard}>
+                <div 
+                  className={styles.cardThumbnail}
+                  style={{ backgroundImage: `url(${community.thumbnail || 'https://source.unsplash.com/random/400x200/?community,group,abstract'})` }}
+                >
+                  {/* Placeholder for image or can be a background image */} 
+                </div>
+                <div className={styles.cardContent}>
+                  <h2 className={styles.cardName}>{community.name}</h2>
+                  <p className={styles.cardDescription}>
+                    {community.description ? 
+                      (community.description.length > 100 ? `${community.description.substring(0, 97)}...` : community.description) 
+                      : 'No description available.'}
+                  </p>
+                  <div className={styles.cardMeta}>
+                    <span className={styles.metaItem}>
+                      <IconUsers /> {community.memberCount || 0} Members
+                    </span>
+                    <span className={`${styles.metaItem} ${styles.typeBadge}`}>{community.type}</span>
+                  </div>
+                  <div className={styles.cardFooter}>
+                     {/* The Link wrapping the card makes this button redundant, but kept for style consistency if needed elsewhere */}
+                     {/* <button className={`${styles.button} ${styles.buttonSecondary}`}>View Details</button> */}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   );

@@ -1,0 +1,119 @@
+/* src/components/CommunityCard.module.css */
+.communityCard {
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  height: 100%; /* Ensure cards in a row take up full height of the row */
+}
+
+.communityCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 90, 156, 0.12); /* Primary color shadow hint */
+}
+
+.banner {
+  height: 100px; /* Adjusted for a more compact card */
+  background-size: cover;
+  background-position: center;
+  background-color: var(--color-primary-light, #e3f2fd); /* Fallback color */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* Ensure image scaling doesn't break layout */
+}
+
+.bannerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease-in-out;
+}
+
+.communityCard:hover .bannerImage {
+  transform: scale(1.05);
+}
+
+.bannerInitial {
+  font-size: 2.5rem; /* 40px */
+  font-weight: 600;
+  color: var(--color-primary, #005A9C);
+  opacity: 0.6;
+}
+
+.content {
+  padding: 1rem; /* 16px */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Allows content to fill space, pushing footer down */
+}
+
+.name {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  color: var(--color-primary, #005A9C);
+  margin-bottom: 0.375rem; /* 6px */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.description {
+  font-size: 0.875rem; /* 14px */
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 0.75rem; /* 12px */
+  flex-grow: 1; /* Allows description to take available space */
+  /* For line clamping */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Show 2 lines */
+  line-clamp: 2; /* Standard property */
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+  min-height: 2.625em; /* 0.875rem * 1.5 line-height * 2 lines */
+}
+
+.footer {
+  margin-top: auto; /* Pushes footer to the bottom */
+  padding-top: 0.75rem; /* 12px */
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem; /* 13px */
+  color: #777;
+}
+
+.memberInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem; /* 6px */
+}
+
+.memberInfo svg {
+  width: 0.9375rem; /* 15px */
+  height: 0.9375rem; /* 15px */
+}
+
+.joinButton {
+  padding: 0.375rem 0.875rem; /* 6px 14px */
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 500;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  background-color: var(--color-secondary, #00A99D);
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.joinButton:hover {
+  background-color: var(--color-secondary-dark, #008a7d);
+  box-shadow: 0 2px 8px rgba(0, 169, 157, 0.2);
+}

@@ -1,0 +1,24 @@
+.pageContainer {
+  padding: 24px;
+  max-width: 700px; /* Centered form */
+  margin: 0 auto;
+  background-color: #F4F6F8; /* Light Gray background */
+  min-height: calc(100vh - 60px); /* Assuming 60px navbar height */
+}
+
+.infoText {
+  text-align: center;
+  font-size: 18px;
+  color: #666666; /* Medium Gray */
+  margin-top: 40px;
+}
+
+.errorText {
+  color: #D32F2F; /* Error Red */
+  font-size: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+  background-color: rgba(211, 47, 47, 0.1);
+  padding: 10px;
+  border-radius: 4px;
+}

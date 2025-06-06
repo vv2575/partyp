@@ -1,58 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link'; // Import Link from next/link
-import { useAuth } from '../../../context/AuthContext'; // Adjusted path
-import { db } from '../../../lib/firebase'; // Adjusted path
+import Link from 'next/link';
+import { useAuth } from '../../../context/AuthContext';
+import { db } from '../../../lib/firebase';
 import {
-  doc,
-  getDoc,
   collection,
   addDoc,
   query,
   where,
-  orderBy,
+  getDocs,
+  doc,
+  Timestamp,
   onSnapshot,
   serverTimestamp,
-  Timestamp,
+  updateDoc,
+  increment,
   setDoc,
-  DocumentSnapshot, // Added for explicit typing
-  QuerySnapshot,    // Added for explicit typing
-  // updateDoc, // For member count, if implemented in Phase 1
-  // increment, // For member count, if implemented in Phase 1
+  DocumentSnapshot,
+  QuerySnapshot,
+  orderBy
 } from 'firebase/firestore';
-import { FirebaseError } from 'firebase/app'; // For typing errors
+import { FirebaseError } from '@firebase/app';
 import styles from './community-detail.module.css';
+import type { Community, CommunityPost, CommunityPostComment, CommunityMember } from '../../../types/community';
 
-interface CommunityData {
-  id: string;
-  name: string;
-  description: string;
-  type: 'location' | 'expertise';
-  basisDetail: string;
-  leaderUid: string;
-  leaderName: string;
-  memberCount: number;
-  createdAt: Timestamp;
-}
-
-interface PostData {
-  id: string;
-  authorUid: string;
-  authorDisplayName: string;
-  authorPhotoURL?: string;
-  content: string;
-  createdAt: Timestamp;
-}
-
-interface CommunityMember {
-    userId: string;
-    communityId: string;
-    role: 'leader' | 'member';
-    status: 'approved'; // Phase 1 is open joining
-    joinedAt: Timestamp;
-}
+const IconInfo = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 inline-block mr-1"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>;
+const IconUsers = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 inline-block mr-1"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" /></svg>;
+const IconEdit = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 inline-block mr-1"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg>;
+const IconPlusCircle = () => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 inline-block mr-1"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" /></svg>;
 
 export default function CommunityDetailPage() {
   const params = useParams();
@@ -60,10 +37,15 @@ export default function CommunityDetailPage() {
   const router = useRouter();
   const { currentUser, loading: authLoading } = useAuth();
 
-  const [community, setCommunity] = useState<CommunityData | null>(null);
-  const [posts, setPosts] = useState<PostData[]>([]);
+  const [community, setCommunity] = useState<Community | null>(null);
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [newPostContent, setNewPostContent] = useState('');
+  const [comments, setComments] = useState<{ [postId: string]: CommunityPostComment[] }>({});
+  const [newCommentContent, setNewCommentContent] = useState<{ [postId: string]: string }>({});
+  const [loadingComments, setLoadingComments] = useState<{ [postId: string]: boolean }>({});
+  const [visibleComments, setVisibleComments] = useState<string | null>(null);
   const [isMember, setIsMember] = useState(false);
+  const [joinStatus, setJoinStatus] = useState<'pending' | 'approved' | 'rejected' | 'banned' | null>(null);
   const [isLeader, setIsLeader] = useState(false);
 
   const [loadingCommunity, setLoadingCommunity] = useState(true);
@@ -71,36 +53,109 @@ export default function CommunityDetailPage() {
   const [error, setError] = useState('');
   const [actionInProgress, setActionInProgress] = useState(false);
 
-  // Fetch community details
+  const fetchComments = useCallback(async (postId: string) => {
+    if (loadingComments[postId] || (comments[postId] && comments[postId].length > 0 && visibleComments === postId)) {
+      return;
+    }
+    setLoadingComments(prev => ({ ...prev, [postId]: true }));
+    try {
+      const commentsCollectionRef = collection(db, 'postComments');
+      const q = query(
+        commentsCollectionRef,
+        where('postId', '==', postId),
+        orderBy('createdAt', 'asc')
+      );
+      const querySnapshot = await getDocs(q);
+      const fetchedComments: CommunityPostComment[] = [];
+      querySnapshot.forEach((docSnap: DocumentSnapshot) => {
+        fetchedComments.push({ commentId: docSnap.id, ...(docSnap.data() as Omit<CommunityPostComment, 'commentId'>) } as CommunityPostComment);
+      });
+      setComments(prev => ({ ...prev, [postId]: fetchedComments }));
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+    } finally {
+      setLoadingComments(prev => ({ ...prev, [postId]: false }));
+    }
+  }, [loadingComments, comments, visibleComments]);
+
+  const toggleCommentsVisibility = useCallback((postId: string) => {
+    setVisibleComments(prevVisible => {
+      if (prevVisible === postId) {
+        return null; // Hide if already visible
+      } else {
+        // Show this post's comments
+        if (!comments[postId] || comments[postId].length === 0) { // Fetch only if not already fetched or empty
+          fetchComments(postId);
+        }
+        return postId;
+      }
+    });
+  }, [comments, fetchComments]);
+
+  const handleNewCommentChange = (postId: string, text: string) => {
+    setNewCommentContent(prev => ({ ...prev, [postId]: text }));
+  };
+
+  const handleCommentSubmit = async (e: React.FormEvent<HTMLFormElement>, postId: string) => {
+    e.preventDefault();
+    if (!currentUser || !newCommentContent[postId]?.trim()) return;
+    setActionInProgress(true);
+    try {
+      const commentDataToSubmit = {
+        postId: postId,
+        communityId: communityId,
+        authorUid: currentUser.uid,
+        authorDisplayName: currentUser.displayName || 'Anonymous User',
+        authorPhotoURL: currentUser.photoURL || '',
+        content: newCommentContent[postId],
+        createdAt: serverTimestamp(),
+        likesCount: 0,
+      };
+      const commentDocRef = await addDoc(collection(db, 'postComments'), commentDataToSubmit);
+      const newComment: CommunityPostComment = {
+        commentId: commentDocRef.id,
+        ...commentDataToSubmit,
+        createdAt: Timestamp.now(), // Use client-side timestamp for immediate UI update
+      };
+      setComments(prev => ({
+        ...prev,
+        [postId]: [...(prev[postId] || []), newComment]
+      }));
+      setNewCommentContent(prev => ({ ...prev, [postId]: '' }));
+      const postDocRef = doc(db, 'communityPosts', postId);
+      await updateDoc(postDocRef, { commentsCount: increment(1) });
+    } catch (err) {
+      console.error('Error posting comment:', err);
+      setError('Failed to post comment.');
+    } finally {
+      setActionInProgress(false);
+    }
+  };
+
   useEffect(() => {
     if (!communityId) return;
     setLoadingCommunity(true);
     const communityDocRef = doc(db, 'communities', communityId);
     const unsubscribe = onSnapshot(communityDocRef, (docSnap: DocumentSnapshot) => {
       if (docSnap.exists()) {
-        const data = docSnap.data() as Omit<CommunityData, 'id'>;
-        setCommunity({ id: docSnap.id, ...data });
-        if (currentUser && data.leaderUid === currentUser.uid) {
-            setIsLeader(true);
-        } else {
-            setIsLeader(false); // Explicitly set to false if not leader
-        }
+        const data = docSnap.data() as Omit<Community, 'communityId'>;
+        setCommunity({ communityId: docSnap.id, ...data } as Community);
+        setIsLeader(!!(currentUser && data.leaderUid === currentUser.uid));
       } else {
         setError('Community not found.');
         setCommunity(null);
-        setIsLeader(false); // Ensure isLeader is false if community not found
+        setIsLeader(false);
       }
       setLoadingCommunity(false);
     }, (err: FirebaseError) => {
       console.error('Error fetching community:', err);
       setError('Failed to load community details.');
       setLoadingCommunity(false);
-      setIsLeader(false); // Ensure isLeader is false on error
+      setIsLeader(false);
     });
     return () => unsubscribe();
   }, [communityId, currentUser]);
 
-  // Fetch community posts
   useEffect(() => {
     if (!communityId) return;
     setLoadingPosts(true);
@@ -111,9 +166,9 @@ export default function CommunityDetailPage() {
       orderBy('createdAt', 'desc')
     );
     const unsubscribe = onSnapshot(q, (querySnapshot: QuerySnapshot) => {
-      const fetchedPosts: PostData[] = [];
+      const fetchedPosts: CommunityPost[] = [];
       querySnapshot.forEach((docSnap: DocumentSnapshot) => {
-        fetchedPosts.push({ id: docSnap.id, ...docSnap.data() } as PostData);
+        fetchedPosts.push({ postId: docSnap.id, ...(docSnap.data() as Omit<CommunityPost, 'postId'>) } as CommunityPost);
       });
       setPosts(fetchedPosts);
       setLoadingPosts(false);
@@ -125,151 +180,184 @@ export default function CommunityDetailPage() {
     return () => unsubscribe();
   }, [communityId]);
 
-  // Check membership status
   useEffect(() => {
     if (!currentUser || !communityId || authLoading) {
+      setJoinStatus(null);
       setIsMember(false);
       return;
     }
-    const memberDocRef = doc(db, 'communityMembers', `${communityId}_${currentUser.uid}`);
+    const memberDocRef = doc(db, 'communities', communityId, 'members', currentUser.uid);
     const unsubscribe = onSnapshot(memberDocRef, (docSnap: DocumentSnapshot) => {
-        setIsMember(docSnap.exists() && docSnap.data()?.status === 'approved');
+      if (docSnap.exists()) {
+        const memberData = docSnap.data() as CommunityMember;
+        setJoinStatus(memberData.status as 'pending' | 'approved' | 'rejected' | 'banned');
+        setIsMember(memberData.status === 'approved');
+      } else {
+        setJoinStatus(null);
+        setIsMember(false);
+      }
+    }, (err: FirebaseError) => {
+      console.error('Error fetching membership status:', err);
+      setJoinStatus(null);
+      setIsMember(false);
     });
     return () => unsubscribe();
-  }, [currentUser, communityId, authLoading]);
-
+  }, [communityId, currentUser, authLoading]);
 
   const handlePostSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!currentUser) {
-      setError('You must be logged in to post.');
-      router.push('/auth/login');
+    if (!currentUser || !newPostContent.trim()) {
+      setError('You must be logged in and provide content to post.');
       return;
     }
     if (!isMember && !isLeader) {
-        setError('You must be a member to post in this community.');
-        return;
-    }
-    if (!newPostContent.trim()) {
-      setError('Post content cannot be empty.');
+      setError('You must be a member of this community to post.');
       return;
     }
     setActionInProgress(true);
     setError('');
     try {
-      if (!currentUser || !currentUser.displayName) {
-        setError('User information is not available. Cannot post.');
-        setActionInProgress(false);
-        return;
-      }
-      await addDoc(collection(db, 'communityPosts'), {
-        communityId,
+      const postDataToSubmit = {
+        communityId: communityId,
         authorUid: currentUser.uid,
-        authorDisplayName: currentUser.displayName || 'Anonymous',
+        authorDisplayName: currentUser.displayName || 'Anonymous User',
         authorPhotoURL: currentUser.photoURL || '',
-        content: newPostContent.trim(),
+        content: newPostContent,
         createdAt: serverTimestamp(),
-        likesCount: 0, // As per APP_PLAN for communityPosts
-        commentsCount: 0 // As per APP_PLAN for communityPosts
-      });
+        likesCount: 0,
+        commentsCount: 0,
+      };
+      await addDoc(collection(db, 'communityPosts'), postDataToSubmit);
       setNewPostContent('');
     } catch (err) {
-    console.error('Error creating post:', err);
-    if (err instanceof FirebaseError) {
-      setError(`Firebase error: ${err.message} (Code: ${err.code})`);
-    } else if (err instanceof Error) {
-      setError(`Error: ${err.message}`);
-    } else {
-      setError('An unexpected error occurred while posting. Please try again.');
+      console.error('Error creating post:', err);
+      setError(`Failed to create post: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setActionInProgress(false);
     }
-  } 
-    setActionInProgress(false);
   };
 
   const handleJoinCommunity = async () => {
     if (!currentUser) {
-      setError('You must be logged in to join.');
       router.push('/auth/login');
       return;
     }
-    if (isMember || isLeader) return;
-
+    if (!community) return;
     setActionInProgress(true);
     setError('');
     try {
-      const memberDocRef = doc(db, 'communityMembers', `${communityId}_${currentUser.uid}`);
-      await setDoc(memberDocRef, {
-        communityId,
+      const memberDocRef = doc(db, 'communities', communityId, 'members', currentUser.uid);
+      const memberData: CommunityMember = {
+        membershipId: currentUser.uid, // Assuming doc ID is membershipId
+        communityId: communityId,
         userId: currentUser.uid,
-        userDisplayName: currentUser.displayName || 'Anonymous',
+        userDisplayName: currentUser.displayName || 'Anonymous User',
         userPhotoURL: currentUser.photoURL || '',
         role: 'member',
-        status: 'approved', // Phase 1: Open joining
-        joinedAt: serverTimestamp(),
-        requestedAt: serverTimestamp() // For open joining, joinedAt and requestedAt can be same
-      });
-      // Optionally, update member count on community document (or use Cloud Function later)
-      // const communityDocRef = doc(db, 'communities', communityId);
-      // await updateDoc(communityDocRef, { memberCount: increment(1) });
-      setIsMember(true); // Update UI immediately
+        status: community.requiresApproval ? 'pending' : 'approved',
+        joinedAt: serverTimestamp() as unknown as Timestamp, // Cast to satisfy local type
+        requestedAt: serverTimestamp() as unknown as Timestamp, // Add required field and cast
+      };
+      await setDoc(memberDocRef, memberData);
+      if (memberData.status === 'approved') {
+        const communityDocRef = doc(db, 'communities', communityId);
+        await updateDoc(communityDocRef, { memberCount: increment(1) });
+      }
     } catch (err) {
-    console.error('Error joining community:', err);
-    if (err instanceof FirebaseError) {
-      setError(`Firebase error: ${err.message} (Code: ${err.code})`);
-    } else if (err instanceof Error) {
-      setError(`Error: ${err.message}`);
-    } else {
-      setError('An unexpected error occurred while joining. Please try again.');
+      console.error('Error joining community:', err);
+      setError(`Failed to join community: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    } finally {
+      setActionInProgress(false);
     }
-  } 
-    setActionInProgress(false);
   };
 
-  if (loadingCommunity || authLoading) {
-    return <div className={styles.loadingContainer}>Loading community...</div>;
-  }
-
-  if (error && !community) { // Show error if community fetch failed and no community data
-    return <div className={styles.errorContainer}>{error}</div>;
+  if (authLoading || loadingCommunity) {
+    return <div className={styles.loadingScreen}><div className={styles.spinner}></div>Loading community details...</div>;
   }
 
   if (!community) {
-    return <div className={styles.errorContainer}>Community not found.</div>;
+    return <div className={styles.errorScreen}>{error || 'Community not found or failed to load.'}</div>;
   }
 
-  return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.name}>{community.name}</h1>
-        <p className={styles.metaInfo}>
-          <span>Type: <strong>{community.type}</strong></span>
-          <span>Basis: <strong>{community.basisDetail}</strong></span>
-        </p>
-        <p className={styles.leaderInfo}>Leader: <strong>{community.leaderName}</strong></p>
-        <p className={styles.metaInfo}>Members: <strong>{community.memberCount}</strong></p>
-        {currentUser && !isLeader && !isMember && (
-          <button onClick={handleJoinCommunity} className={styles.joinButton} disabled={actionInProgress}>
-            {actionInProgress ? 'Joining...' : 'Join Community'}
-          </button>
-        )}
-        {currentUser && (isMember || isLeader) && <p className={styles.alreadyMemberText}>You are a {isLeader ? 'leader' : 'member'} of this community.</p>}
-        {isLeader && (
-          <Link href={`/communities/${communityId}/edit`} className={styles.editCommunityButton}>
-            Edit Community
+  const renderActionButtons = () => {
+    if (!currentUser) {
+      return (
+        <Link href="/auth/login" className={`${styles.button} ${styles.buttonPrimary}`}>
+          <IconPlusCircle /> Login to Interact
+        </Link>
+      );
+    }
+    if (isLeader) {
+      return (
+        <div className={styles.actionButtonsGroup}>
+          <p className={styles.statusMessage}>You are the commander of this community.</p>
+          <Link href={`/communities/${communityId}/edit`} className={`${styles.button} ${styles.buttonSecondary}`}>
+            <IconEdit /> Edit Community
           </Link>
-        )}
+          <Link href={`/communities/${communityId}/manage-members`} className={`${styles.button} ${styles.buttonSecondary}`}>
+            <IconUsers /> Manage Members
+          </Link>
+        </div>
+      );
+    }
+    if (isMember) {
+      return (
+        <div className={styles.actionButtonsGroup}>
+          <p className={styles.statusMessage}>You are a member of this community.</p>
+          {community.allowStormIn && (
+            <button onClick={() => alert('Feature: Request to Storm In - Not yet implemented.')} className={`${styles.button} ${styles.buttonAccent}`} disabled={actionInProgress}>
+              Request to Storm In
+            </button>
+          )}
+        </div>
+      );
+    }
+    if (joinStatus === 'pending') {
+      return <p className={`${styles.statusMessage} ${styles.statusPending}`}>Your request to join is pending approval.</p>;
+    }
+    if (joinStatus === 'rejected') {
+      return <p className={`${styles.statusMessage} ${styles.statusError}`}>Your request to join was rejected.</p>;
+    }
+    if (joinStatus === 'banned') {
+      return <p className={`${styles.statusMessage} ${styles.statusError}`}>You are banned from this community.</p>;
+    }
+    return (
+      <button onClick={handleJoinCommunity} className={`${styles.button} ${styles.buttonPrimary}`} disabled={actionInProgress}>
+        <IconPlusCircle /> {actionInProgress ? 'Joining...' : 'Join Community'}
+      </button>
+    );
+  };
+
+  return (
+    <div className={styles.pageContainer}>
+      <header className={`${styles.communityHeaderCard} ${styles.card}`}>
+        <h1 className={styles.communityName}>{community.name}</h1>
+        <div className={styles.communityMetaContainer}>
+          <p className={styles.communityMetaItem}><strong>Type:</strong> {community.type}</p>
+          <p className={styles.communityMetaItem}><strong>Basis:</strong> {community.basisDetail}</p>
+          <p className={styles.communityMetaItem}><strong>Leader:</strong> {community.leaderName || 'N/A'}</p>
+          <p className={styles.communityMetaItem}><IconUsers /> <strong>Warriors:</strong> {community.memberCount || 0}</p>
+        </div>
       </header>
 
-      <section className={styles.descriptionSection}>
-        <h2 className={styles.sectionTitle}>About this Community</h2>
-        <p className={styles.description}>{community.description}</p>
+      <section className={styles.actionsContainer}>
+        {renderActionButtons()}
       </section>
 
-      <section className={styles.discussionSection}>
+      {community.description && (
+        <section className={`${styles.aboutSection} ${styles.card}`}>
+          <h2 className={styles.sectionTitle}><IconInfo /> About this Community</h2>
+          <p className={styles.communityDescription}>{community.description}</p>
+        </section>
+      )}
+
+      <section className={`${styles.discussionSection} ${styles.card}`}>
         <h2 className={styles.sectionTitle}>Community Discussion</h2>
+
         {currentUser && (isMember || isLeader) ? (
-          <form onSubmit={handlePostSubmit} className={styles.discussionForm}>
+          <form onSubmit={handlePostSubmit} className={styles.newPostForm}>
             <textarea
+              className={styles.formTextarea}
               value={newPostContent}
               onChange={(e) => setNewPostContent(e.target.value)}
               placeholder="Share your thoughts with the community..."
@@ -277,38 +365,93 @@ export default function CommunityDetailPage() {
               required
               disabled={actionInProgress}
             />
-            <button type="submit" disabled={actionInProgress || !newPostContent.trim()}>
-              {actionInProgress ? 'Posting...' : 'Post'}
+            <button type="submit" className={`${styles.button} ${styles.buttonPrimary}`} disabled={actionInProgress || !newPostContent.trim()}>
+              {actionInProgress ? 'Posting...' : 'Post to Community'}
             </button>
           </form>
         ) : currentUser ? (
-            <p>You must join this community to post.</p>
+          <p className={styles.infoMessage}>You must be a member of this community to post.</p>
         ) : (
-          <p>Please <Link href="/auth/login" style={{color: '#007bff', textDecoration: 'underline'}}>login</Link> to post or join the community.</p>
+          <p className={styles.infoMessage}>Please <Link href="/auth/login" className={styles.inlineLink}>login</Link> to post or join the community.</p>
         )}
 
+        {error && <p className={styles.errorMessage}>{error}</p>}
 
-        {error && !community && <p className={styles.errorContainer}>{error}</p>} {/* Display general errors here if needed */}
-        
         {loadingPosts ? (
-          <p>Loading posts...</p>
+          <div className={styles.loadingMessage}><div className={styles.spinner}></div>Loading posts...</div>
         ) : posts.length > 0 ? (
           <ul className={styles.postList}>
             {posts.map((post) => (
-              <li key={post.id} className={styles.postItem}>
-                <div className={styles.postAuthor}>{post.authorDisplayName}</div>
-                <p className={styles.postContent}>{post.content}</p>
-                <div className={styles.postTimestamp}>
-                  {post.createdAt?.toDate().toLocaleString()}
+              <li key={post.postId} className={`${styles.postItem} ${styles.cardItem}`}>
+                <div className={styles.postAuthorInfo}>
+                  {post.authorPhotoURL ? (
+                    <img src={post.authorPhotoURL} alt={post.authorDisplayName} className={styles.authorAvatar} />
+                  ) : (
+                    <div className={`${styles.authorAvatar} ${styles.authorAvatarPlaceholder}`}><span>{post.authorDisplayName?.charAt(0).toUpperCase()}</span></div>
+                  )}
+                  <span className={styles.authorName}>{post.authorDisplayName}</span>
                 </div>
+                <p className={styles.postContent}>{post.content}</p>
+                <div className={styles.postMeta}>
+                  <span className={styles.timestamp}>{post.createdAt?.toDate().toLocaleString()}</span>
+                  <button
+                    onClick={() => toggleCommentsVisibility(post.postId)}
+                    className={`${styles.button} ${styles.buttonLink}`}
+                    disabled={loadingComments[post.postId]}
+                  >
+                    {loadingComments[post.postId] ? '...' : (visibleComments === post.postId ? 'Hide Comments' : `View Comments (${post.commentsCount || 0})`)}
+                  </button>
+                </div>
+
+                {visibleComments === post.postId && (
+                  <div className={styles.commentsArea}>
+                    {loadingComments[post.postId] && <div className={styles.loadingMessage}><div className={styles.spinnerSmall}></div>Loading comments...</div>}
+                    {!loadingComments[post.postId] && comments[post.postId] && comments[post.postId].length > 0 ? (
+                      <ul className={styles.commentList}>
+                        {comments[post.postId].map(comment => (
+                          <li key={comment.commentId} className={styles.commentItem}>
+                            <div className={styles.commentAuthorInfo}>
+                              {comment.authorPhotoURL ? (
+                                <img src={comment.authorPhotoURL} alt={comment.authorDisplayName} className={styles.authorAvatarSmall} />
+                              ) : (
+                                <div className={`${styles.authorAvatarSmall} ${styles.authorAvatarPlaceholder}`}><span>{comment.authorDisplayName?.charAt(0).toUpperCase()}</span></div>
+                              )}
+                              <span className={styles.authorNameSmall}>{comment.authorDisplayName}</span>
+                            </div>
+                            <p className={styles.commentContent}>{comment.content}</p>
+                            <span className={styles.timestampSmall}>{comment.createdAt?.toDate().toLocaleString()}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : !loadingComments[post.postId] && (
+                      <p className={styles.noCommentsMessage}>No comments yet. Be the first to comment!</p>
+                    )}
+
+                    {currentUser && (isMember || isLeader) && (
+                      <form onSubmit={(e) => handleCommentSubmit(e, post.postId)} className={styles.newCommentForm}>
+                        <textarea
+                          className={styles.formTextareaSmall}
+                          value={newCommentContent[post.postId] || ''}
+                          onChange={(e) => handleNewCommentChange(post.postId, e.target.value)}
+                          placeholder="Write a comment..."
+                          rows={2}
+                          required
+                          disabled={actionInProgress}
+                        />
+                        <button type="submit" className={`${styles.button} ${styles.buttonSecondary} ${styles.buttonSmall}`} disabled={actionInProgress || !newCommentContent[post.postId]?.trim()}>
+                          {actionInProgress ? '...' : 'Post Comment'}
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
         ) : (
-          <p className={styles.noPosts}>No posts in this community yet. Be the first to share!</p>
+          !loadingPosts && <p className={styles.noPostsMessage}>No posts in this community yet. Be the first to share!</p>
         )}
       </section>
     </div>
   );
 }
-

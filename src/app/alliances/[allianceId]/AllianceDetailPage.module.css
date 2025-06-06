@@ -1,0 +1,118 @@
+/* src/app/alliances/[allianceId]/AllianceDetailPage.module.css */
+.pageContainer {
+  padding: 2rem;
+  background-color: var(--color-background, #f4f6f8);
+  min-height: calc(100vh - 70px); /* Adjust based on Navbar height */
+  color: var(--color-text-primary, #212529);
+}
+
+.loadingState,
+.errorState,
+.notFoundState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 150px); /* Adjust based on navbar/footer */
+  font-size: 1.25rem;
+  color: var(--color-text-secondary, #6c757d);
+  padding: 2rem;
+  text-align: center;
+  border-radius: 8px; /* Added for consistency */
+}
+
+.errorState {
+  color: var(--color-error, #D32F2F);
+  background-color: rgba(211, 47, 47, 0.05); /* Lighter background for error */
+  border: 1px solid rgba(211, 47, 47, 0.1);
+}
+
+.header {
+  background: var(--color-gradient-primary, linear-gradient(135deg, var(--color-primary, #005A9C) 0%, var(--color-secondary, #00A99D) 100%));
+  color: white;
+  padding: 2.5rem; /* Increased padding */
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg, 0 8px 25px rgba(0,0,0,0.15));
+  margin-bottom: 2.5rem;
+  position: relative; /* For potential decorative elements or overlays */
+}
+
+.allianceName {
+  font-size: 2.75rem; /* Slightly larger */
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.allianceDescription {
+  font-size: 1.125rem;
+  opacity: 0.95; /* Slightly more opaque */
+  margin-bottom: 1.5rem;
+  line-height: 1.7;
+  max-width: 80ch; /* Limit line length for readability */
+}
+
+.bannerImageContainer { /* Added a container for better control */
+  margin-top: 1.5rem;
+  border-radius: 8px;
+  overflow: hidden; /* Ensures image respects border-radius */
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.1));
+}
+
+.bannerImage {
+  width: 100%;
+  max-height: 400px; /* Increased max height */
+  object-fit: cover;
+  display: block; /* Removes any bottom space from img tag */
+}
+
+.metaInfo {
+  margin-top: 2rem; /* Increased top margin */
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.metaInfo p {
+  margin-bottom: 0.3rem;
+}
+
+.section {
+  background-color: var(--color-background-alt, #ffffff);
+  padding: 2rem 2.5rem; /* Consistent padding */
+  border-radius: 12px;
+  box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08));
+  margin-bottom: 2.5rem;
+}
+
+.sectionTitle {
+  font-size: 2rem; /* Increased size */
+  font-weight: 600;
+  color: var(--color-primary, #005A9C);
+  margin-bottom: 1.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--color-primary-light, #e0efff);
+  display: flex; /* For potential icons next to title */
+  align-items: center;
+}
+
+.managementDashboardContainer {
+  margin-top: 2.5rem;
+  /* Styles for this container can be added if AllianceManagementDashboard needs a specific wrapper */
+}
+
+/* Consider re-adding specific styles like .settingsButton, .joinSection, .leaveButton if needed,
+   adapting them to use CSS variables and fit the new structure.
+   For example:
+.settingsButton {
+  background-color: var(--color-secondary, #00A99D);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.settingsButton:hover {
+  background-color: var(--color-secondary-dark, #008C7F);
+}
+*/

@@ -1,146 +1,227 @@
-.container {
+/* src/app/profile/profile.module.css */
+.profilePageContainer {
+  padding: 2rem;
+  background-color: var(--color-background, #f4f6f8);
+  min-height: calc(100vh - 70px); /* Adjust based on Navbar height */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 80vh;
-  padding: 2rem;
-  background-color: #f4f6f8;
 }
 
 .profileCard {
-  background-color: #fff;
-  padding: 2rem 2.5rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-background-alt, #ffffff);
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   width: 100%;
-  max-width: 500px;
-}
-
-.title {
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 600;
+  max-width: 700px;
   margin-bottom: 2rem;
-  color: #333;
 }
 
-.infoItem {
+.profileHeader {
+  font-size: 1.75rem; /* 28px */
+  font-weight: 600;
+  color: var(--color-primary, #005A9C);
   margin-bottom: 1.5rem;
-  font-size: 1.1rem;
-  color: #555;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  text-align: center;
 }
 
-.infoItem strong {
-  color: #333;
+.profileDetail {
+  margin-bottom: 1rem;
+  font-size: 1rem; /* 16px */
+  color: var(--color-text-light, #555);
+}
+
+.profileDetail strong {
+  color: var(--color-text, #333);
   margin-right: 0.5rem;
-}
-
-.editButton {
-  background: none;
-  border: 1px solid #007bff;
-  color: #007bff;
-  padding: 0.3rem 0.8rem;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.2s, color 0.2s;
-}
-
-.editButton:hover {
-  background-color: #007bff;
-  color: white;
-}
-
-.editForm {
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
+  font-weight: 500;
 }
 
 .formGroup {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .formGroup label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: 500;
-  color: #555;
+  color: var(--color-text, #333);
 }
 
-.formGroup input {
+.formGroup input[type="text"],
+.formGroup input[type="email"],
+.formGroup textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  padding: 0.625rem 0.875rem; /* 10px 14px */
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: 6px;
   font-size: 1rem;
   box-sizing: border-box;
+  background-color: var(--color-background-input, #fff);
+  color: var(--color-text-input, #333);
 }
 
-.formGroup input:focus {
+.formGroup input:focus,
+.formGroup textarea:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-color: var(--color-primary, #005A9C);
+  box-shadow: 0 0 0 0.2rem rgba(0, 90, 156, 0.2);
+}
+
+.formGroup input[disabled] {
+  background-color: var(--color-background-disabled, #e9ecef);
+  cursor: not-allowed;
 }
 
 .buttonGroup {
-    display: flex;
-    gap: 1rem;
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  justify-content: flex-end;
 }
 
-.button {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #007bff;
-  color: white;
+.saveButton,
+.cancelButton,
+.editButton {
+  padding: 0.625rem 1.25rem; /* 10px 20px */
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 6px;
+  font-size: 0.9375rem; /* 15px */
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-  text-align: center;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.button:hover {
-  background-color: #0056b3;
+.saveButton {
+  background-color: var(--color-primary, #005A9C);
+  color: white;
 }
 
-.button:disabled {
-  background-color: #cccccc;
+.saveButton:hover {
+  background-color: var(--color-primary-dark, #004374);
+  box-shadow: 0 2px 8px rgba(0, 90, 156, 0.2);
+}
+
+.saveButton:disabled {
+  background-color: var(--color-primary-light, #b3d4e8);
   cursor: not-allowed;
 }
 
 .cancelButton {
-    background-color: #6c757d;
+  background-color: var(--color-secondary-light, #e0e0e0);
+  color: var(--color-text, #333);
 }
 
 .cancelButton:hover {
-    background-color: #5a6268;
+  background-color: #c7c7c7;
 }
 
-.logoutButton {
+.editButtonContainer {
+  text-align: right;
   margin-top: 1.5rem;
-  background-color: #dc3545;
 }
 
-.logoutButton:hover {
-  background-color: #c82333;
+.editButton {
+  background-color: var(--color-secondary, #00A99D);
+  color: white;
+}
+
+.editButton:hover {
+  background-color: var(--color-secondary-dark, #008a7d);
+  box-shadow: 0 2px 8px rgba(0, 169, 157, 0.2);
+}
+
+.loading,
+.error {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.125rem; /* 18px */
+  color: var(--color-text-light, #555);
 }
 
 .error {
-  color: red;
-  margin-bottom: 1rem;
-  text-align: center;
-  font-size: 0.9rem;
+  color: var(--color-error, red);
 }
 
-.success {
-  color: green;
-  margin-bottom: 1rem;
+/* Joined Communities Section Styles */
+.joinedCommunitiesSection {
+  background-color: var(--color-background-alt, #ffffff);
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 700px;
+  margin-top: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 600;
+  color: var(--color-primary, #005A9C);
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border-light, #eee);
+}
+
+.loadingText,
+.noCommunitiesText {
+  font-size: 1rem; /* 16px */
+  color: var(--color-text-light, #777);
+  padding: 1rem 0;
   text-align: center;
-  font-size: 0.9rem;
+}
+
+.communitiesList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.communityItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.875rem 0; /* 14px 0 */
+  border-bottom: 1px solid var(--color-border-extralight, #f5f5f5);
+}
+
+.communityItem:last-child {
+  border-bottom: none;
+}
+
+.communityInfo {
+  flex-grow: 1;
+}
+
+.communityName {
+  font-size: 1.0625rem; /* 17px */
+  font-weight: 500;
+  color: var(--color-text, #333);
+}
+
+.allianceName {
+  font-size: 0.875rem; /* 14px */
+  color: var(--color-text-light, #666);
+  margin-left: 0.5rem;
+  font-style: italic;
+}
+
+.viewCommunityLink {
+  padding: 0.375rem 0.875rem; /* 6px 14px */
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  color: var(--color-secondary, #00A99D);
+  background-color: transparent;
+  border: 1px solid var(--color-secondary-light, #b2dfdb); /* Lighter border for subtlety */
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap; /* Prevent wrapping */
+}
+
+.viewCommunityLink:hover {
+  background-color: var(--color-secondary-extralight, #e0f2f1); /* Very light hover background */
+  color: var(--color-secondary-dark, #00796b);
+  border-color: var(--color-secondary, #00A99D);
 }

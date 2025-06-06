@@ -11,19 +11,11 @@ import {
   updateDoc,
   serverTimestamp,
   Timestamp,
+  deleteDoc,
 } from 'firebase/firestore';
-
+import type { Community } from '../../../../types/community';
 
 import styles from './edit-community.module.css';
-
-interface CommunityData {
-  name: string;
-  description: string;
-  type: 'location' | 'expertise';
-  basisDetail: string;
-  leaderUid: string;
-  // Add other fields if they are also editable or needed for display
-}
 
 export default function EditCommunityPage() {
   const params = useParams();
@@ -40,6 +32,7 @@ export default function EditCommunityPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
   const fetchCommunityData = useCallback(async () => {
@@ -50,7 +43,7 @@ export default function EditCommunityPage() {
       const docSnap = await getDoc(communityDocRef);
 
       if (docSnap.exists()) {
-        const data = docSnap.data() as CommunityData;
+        const data = docSnap.data() as Community;
         setName(data.name);
         setDescription(data.description);
         setType(data.type);
@@ -118,6 +111,44 @@ export default function EditCommunityPage() {
       setError(err.message || 'Failed to update community. Please try again.');
     }
     setSubmitting(false);
+  };
+
+  const handleDeleteCommunity = async () => {
+    if (!currentUser || currentUser.uid !== originalLeaderUid) {
+      setError('You are not authorized to perform this action.');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this community? This will also delete all associated posts and member data. This action cannot be undone.'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleting(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      // TODO: Implement cascading deletes for posts, comments, and members.
+      // This is best handled with Firebase Functions for atomicity and reliability.
+      // For now, we only delete the community document itself.
+
+      const communityDocRef = doc(db, 'communities', communityId);
+      await deleteDoc(communityDocRef);
+      
+      setSuccess('Community deleted successfully.');
+      // Redirect to communities list page after deletion
+      router.push('/communities'); 
+
+    } catch (err: any) {
+      console.error('Error deleting community:', err);
+      setError(err.message || 'Failed to delete community. Please try again.');
+      setDeleting(false);
+    }
+    // No need to setDeleting(false) if successful and redirected.
   };
 
   if (authLoading || loadingData) {
@@ -195,7 +226,7 @@ export default function EditCommunityPage() {
               id="basisDetail"
               value={basisDetail}
               onChange={(e) => setBasisDetail(e.target.value)}
-              placeholder={type === 'location' ? 'e.g., New York City' : 'e.g., Renewable Energy'}
+              placeholder={type === 'location' ? 'e.g., India, UP, Bihar ' : 'e.g., Renewable Energy'}
               required
             />
           </div>
@@ -207,6 +238,21 @@ export default function EditCommunityPage() {
         <Link href={`/communities/${communityId}`} className={styles.linkBack}>
           Back to Community Page
         </Link>
+
+        <div className={styles.dangerZone}>
+          <h3 className={styles.dangerZoneTitle}>Danger Zone</h3>
+          <button 
+            type="button" 
+            onClick={handleDeleteCommunity} 
+            className={`${styles.button} ${styles.deleteButton}`}
+            disabled={deleting || submitting || (currentUser?.uid !== originalLeaderUid)}
+          >
+            {deleting ? 'Deleting...' : 'Delete Community'}
+          </button>
+          <p className={styles.dangerZoneWarning}>
+            Deleting the community is permanent and will remove all associated data.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import {createCommunity} from '@/firebase/communityService';
 
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -55,11 +56,19 @@ export default function CreateCommunityPage() {
         updatedAt: serverTimestamp(),
         // Optional fields like bannerImageUrl can be added later
       };
+      
+      const communityId = await createCommunity(communityData, {
+        uid: currentUser.uid,
+        displayName: currentUser.displayName || 'Anonymous Leader',
+        photoURL: currentUser.photoURL || '',
+        email: currentUser.email || 'anonymous@example.com',
+      });
 
-      const docRef = await addDoc(collection(db, 'communities'), communityData);
-      // Redirect to the new community page or a list of communities
-      // For now, let's redirect to a general communities page or user's profile
-      router.push(`/communities/${docRef.id}`); // Assuming dynamic page [communityId]/page.tsx
+     if (communityId) {
+      router.push(`/communities/${communityId}`);
+     } else {
+      setError('Failed to create community. Please try again.');
+     }
     } catch (err: any) {
       console.error('Error creating community:', err);
       setError(err.message || 'Failed to create community. Please try again.');

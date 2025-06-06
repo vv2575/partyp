@@ -199,13 +199,86 @@ This section outlines the primary collections and their document structures in C
         *   On community/alliance post creation/deletion: Update `commentsCount`, `postsCount`.
         *   On new member joining/leaving community: Update `memberCount` in `communities`.
         *   On community joining/leaving alliance: Update `memberCommunityCount` in `alliances`.
-        *   On new comment: Update `commentsCount` on parent post, send notifications.
-    *   **Callable Functions**:
-        *   Complex actions requiring multiple writes or privileged operations (e.g., processing a join request, creating an alliance and setting up initial roles).
-        *   Sending notifications.
-        *   Aggregating data for dashboards or analytics.
 
-## VI. Development Phases (High-Level)
+## VI. Design Language
+
+### Overall Philosophy
+Clean, modern, accessible, and trustworthy. The design should facilitate easy navigation and clear presentation of information, fostering a sense of community and engagement.
+
+### Color Palette
+- **Primary**: `#005A9C` (Deep Blue) - For primary actions, headers, and key navigation elements.
+- **Secondary**: `#00A99D` (Vibrant Teal) - For secondary actions, accents, and highlighting important information.
+- **Accent/CTA**: `#F57C00` (Warm Orange) - For critical calls to action like "Join," "Create," or "Post."
+- **Neutral/Background**:
+  - Light Gray: `#F4F6F8` - Main backgrounds
+  - White: `#FFFFFF` - Content cards and modals
+  - Dark Gray: `#333333` - Primary text
+  - Medium Gray: `#666666` - Secondary text and icons
+  - Light Border Gray: `#DDE1E4` - Borders and dividers
+- **Status Colors**:
+  - Success: `#4CAF50` (Green)
+  - Error: `#D32F2F` (Red)
+  - Warning: `#FFC107` (Amber)
+
+### Typography
+- **Primary Font**: Sans-serif (Inter, Roboto, or Open Sans)
+- **Headings**:
+  - h1: 32px, Bold
+  - h2: 24px, Bold
+  - h3: 20px, Bold
+- **Body Text**: 16px, Regular
+- **Subtext/Captions**: 14px, Regular
+
+### Spacing & Layout
+- **Grid System**: 12-column responsive grid
+- **Spacing Units**: Multiples of 8px (8px, 16px, 24px, 32px, etc.)
+- **White Space**: Generous use of white space for improved readability
+
+### UI Components
+
+#### Buttons
+- **Primary**: Solid background (Primary color), white text, rounded corners (4-6px radius). Hover: slightly darker shade.
+- **Secondary**: Outlined (Secondary color border and text), transparent background. Hover: light fill of secondary color.
+- **Text/Link Buttons**: Minimal styling, primary or secondary color text.
+
+#### Forms
+- **Inputs**: Clean, simple borders (Light Border Gray), clear labels above or to the left. Focus state: Primary color border.
+- **Labels**: Medium Gray text.
+- **Cards**: White background, subtle shadow, 8px border radius. Used for displaying community snippets, posts, user profiles.
+
+#### Navigation
+- **Navigation Bar**:
+  - Fixed or sticky at the top
+  - Background: White or Light Gray with subtle bottom border
+  - Logo/App Name on the left
+  - Navigation links (Home, Communities, Profile) on the right
+  - User avatar/dropdown for profile and logout
+
+#### Modals
+- Centered on screen
+- Dark overlay background
+- Clear close button in top-right corner
+- White background with consistent padding and rounded corners
+
+### Iconography
+- Use a consistent icon set (Material Icons, Font Awesome)
+- Simple, clear icons that enhance UI without cluttering
+- Standard sizes: 16px, 24px, 32px
+
+### Responsiveness
+- Mobile-first approach
+- Fluid layouts that adapt to different screen sizes
+- Breakpoints for desktop, tablet, and mobile views
+
+### Accessibility (WCAG 2.1 AA Compliance)
+- Minimum color contrast ratio of 4.5:1 for normal text
+- Keyboard navigability for all interactive elements
+- Semantic HTML structure
+- ARIA attributes where necessary
+- Visible focus indicators for keyboard navigation
+
+
+## VII. Development Phases (High-Level)
 
 1.  **Phase 1: Foundation & Core User/Community Features**
     *   Firebase project setup.
@@ -221,6 +294,7 @@ This section outlines the primary collections and their document structures in C
     *   Commenting on community posts.
     *   Community settings page for leaders.
     *   Firestore Security Rules for community access.
+
 3.  **Phase 3: Alliances**
     *   Alliance creation by community leaders.
     *   Communities joining/leaving alliances (basic workflow).
@@ -253,3 +327,4 @@ This section outlines the primary collections and their document structures in C
 *   Integration with other platforms/APIs.
 
 This plan provides a solid foundation. We will refer to and refine this document as development progresses.
+

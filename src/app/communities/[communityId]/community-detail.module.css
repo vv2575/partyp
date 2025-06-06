@@ -1,203 +1,633 @@
-.container {
-  padding: 2rem;
+/* General Page Structure */
+.pageContainer {
+  padding: 24px;
   max-width: 900px;
   margin: 0 auto;
-  background-color: #fff;
+  font-family: 'Inter', 'Roboto', 'Open Sans', sans-serif;
+  color: #333;
+  background-color: #f4f6f8; /* Light grey background for contrast */
 }
 
-.loadingContainer, .errorContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 60vh;
-  font-size: 1.5rem;
-  color: #555;
+/* Card Styling */
+.card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-bottom: 24px;
 }
 
-.errorContainer {
-  color: #e74c3c;
+.cardItem {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 16px;
+  margin-bottom: 16px;
 }
 
-.header {
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 2px solid #eee;
+/* Header Card */
+.communityHeaderCard {
+  text-align: left;
+  border-bottom: 4px solid #005A9C; /* Primary color accent */
 }
 
-.name {
-  font-size: 2.8rem;
+.communityName {
+  font-size: 2.5rem; /* 40px */
   font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
+  color: #005A9C; /* Primary Color */
+  margin-bottom: 16px;
 }
 
-.metaInfo {
-  font-size: 1rem;
-  color: #7f8c8d;
-  margin-bottom: 0.75rem;
-}
-
-.metaInfo span {
-  margin-right: 1rem;
-}
-
-.metaInfo strong {
-  color: #34495e;
-}
-
-.description {
-  font-size: 1.15rem;
-  line-height: 1.7;
-  color: #34495e;
-  margin-bottom: 2rem;
-  white-space: pre-wrap; /* Preserve line breaks in description */
-}
-
-.leaderInfo {
-  font-size: 1.1rem;
+.communityMetaContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px; /* Spacing between items */
+  font-size: 0.9rem; /* 14.4px */
   color: #555;
-  margin-bottom: 0.5rem;
 }
 
-.leaderInfo strong {
-  color: #333;
+.communityMetaItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #eef7ff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #d0e0ff;
 }
 
-.sectionTitle {
-  font-size: 1.8rem;
+.communityMetaItem strong {
   font-weight: 600;
-  color: #333;
-  margin-top: 2.5rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e0e0e0;
+  color: #005A9C;
 }
 
-/* Styles for discussion section (Phase 1: basic posting) */
-.discussionForm {
-  margin-bottom: 2rem;
+/* Actions Container */
+.actionsContainer {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
 }
 
-.discussionForm textarea {
+.actionButtonsGroup {
+    display: flex;
+    flex-direction: column; /* Stack buttons and message vertically */
+    align-items: flex-start;
+    gap: 16px;
+}
+
+/* Section Titles */
+.sectionTitle {
+  font-size: 1.75rem; /* 28px */
+  font-weight: 600;
+  color: #005A9C; /* Primary Color */
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #00A99D; /* Secondary color accent */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* About Section */
+.aboutSection .communityDescription {
+  font-size: 1rem; /* 16px */
+  line-height: 1.6;
+  color: #444;
+}
+
+/* Discussion Section */
+
+/* Forms (New Post, New Comment) */
+.newPostForm, .newCommentForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.formTextarea, .formTextareaSmall {
   width: 100%;
-  min-height: 100px;
-  padding: 0.75rem;
+  padding: 12px;
   border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  box-sizing: border-box;
+  border-radius: 6px;
+  font-size: 1rem; /* 16px */
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s ease-in-out;
 }
 
-.discussionForm button {
-  padding: 0.6rem 1.2rem;
-  background-color: #3498db;
-  color: white;
+.formTextarea:focus, .formTextareaSmall:focus {
+  border-color: #005A9C; /* Primary color */
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 90, 156, 0.2);
+}
+
+.formTextareaSmall {
+  font-size: 0.9rem; /* 14.4px */
+  padding: 10px;
+  min-height: 60px;
+}
+
+/* Buttons */
+.button {
+  padding: 10px 20px;
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
   border: none;
-  border-radius: 4px;
-  font-size: 1rem;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  text-decoration: none; /* For Link components styled as buttons */
+  display: inline-flex; /* For aligning icons and text */
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
 }
 
-.discussionForm button:hover {
-  background-color: #2980b9;
-}
-
-.discussionForm button:disabled {
-  background-color: #aed6f1;
+.button:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
+.buttonPrimary {
+  background-color: #005A9C; /* Primary Color */
+  color: white;
+}
+.buttonPrimary:hover:not(:disabled) {
+  background-color: #004477; /* Darker shade of primary */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.buttonSecondary {
+  background-color: #00A99D; /* Secondary Color */
+  color: white;
+}
+.buttonSecondary:hover:not(:disabled) {
+  background-color: #008075; /* Darker shade of secondary */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.buttonAccent {
+  background-color: #F57C00; /* Accent/CTA Color */
+  color: white;
+}
+.buttonAccent:hover:not(:disabled) {
+  background-color: #d96700; /* Darker shade of accent */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.buttonLink {
+  background-color: transparent;
+  color: #005A9C; /* Primary Color */
+  padding: 8px 12px;
+  font-weight: 500;
+}
+.buttonLink:hover:not(:disabled) {
+  background-color: rgba(0, 90, 156, 0.05);
+  text-decoration: underline;
+}
+
+.buttonSmall {
+  padding: 8px 16px;
+  font-size: 0.9rem; /* 14.4px */
+}
+
+/* Post List & Items */
 .postList {
   list-style: none;
   padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.postItem {
-  background-color: #f9f9f9;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1rem;
+
+.postAuthorInfo, .commentAuthorInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
-.postAuthor {
-  font-weight: bold;
-  color: #2980b9;
-  margin-bottom: 0.3rem;
-  font-size: 1.05rem;
+.authorAvatar, .authorAvatarSmall {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  background-color: #e0e0e0; /* Placeholder background */
+  border: 2px solid #00A99D; /* Secondary color border */
 }
 
-.postContent {
-  font-size: 1rem;
+.authorAvatarPlaceholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #005A9C;
+    background-color: #e0f0ff;
+}
+
+.authorAvatarSmall {
+  width: 32px;
+  height: 32px;
+  border-width: 1px;
+}
+
+.authorName, .authorNameSmall {
+  font-weight: 600;
+  color: #005A9C; /* Primary Color */
+}
+
+.authorNameSmall {
+  font-size: 0.9rem; /* 14.4px */
+}
+
+.postContent, .commentContent {
+  font-size: 1rem; /* 16px */
+  line-height: 1.6;
   color: #333;
-  white-space: pre-wrap; /* Preserve line breaks in post content */
-  margin-bottom: 0.5rem;
+  margin-bottom: 12px;
+  white-space: pre-wrap; /* Preserve line breaks */
 }
 
-.postTimestamp {
-  font-size: 0.85rem;
+.commentContent {
+  font-size: 0.95rem; /* 15.2px */
+}
+
+.postMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem; /* 13.6px */
   color: #777;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
 }
 
-.noPosts {
+.timestamp, .timestampSmall {
+  color: #666;
+}
+
+.timestampSmall {
+  font-size: 0.8rem; /* 12.8px */
+  display: block; /* Make it take its own line in comments */
+  margin-top: 8px;
+}
+
+
+/* Comments Area */
+.commentsArea {
+  margin-top: 24px;
+  padding-top: 16px;
+  padding-left: 16px; /* Indent comments slightly */
+  border-top: 1px dashed #ddd;
+}
+
+.commentList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.commentItem {
+  background-color: #f9f9f9; /* Slightly different background for comments */
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+/* Messages (Loading, Error, Info, No Posts/Comments) */
+.loadingScreen, .errorScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  font-size: 1.2rem; /* 19.2px */
+  color: #555;
+}
+
+.errorScreen {
+  color: #D32F2F; /* Error color */
+}
+
+.spinner, .spinnerSmall {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #005A9C; /* Primary color for spinner */
+  animation: spin 1s ease infinite;
+  margin-bottom: 16px;
+}
+
+.spinnerSmall {
+    width: 20px;
+    height: 20px;
+    border-width: 3px;
+    margin-right: 8px;
+    margin-bottom: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingMessage, .infoMessage, .errorMessage, .noPostsMessage, .noCommentsMessage {
+  padding: 12px 16px;
+  margin: 16px 0;
+  border-radius: 6px;
+  font-size: 0.95rem; /* 15.2px */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.loadingMessage {
+  background-color: #e0f0ff;
+  border: 1px solid #b3d9ff;
+  color: #005A9C;
+}
+
+.infoMessage {
+  background-color: #e0f7fa; /* Light teal */
+  border: 1px solid #b2ebf2;
+  color: #00796b;
+}
+
+.errorMessage {
+  background-color: #ffebee; /* Light red */
+  border: 1px solid #ffcdd2;
+  color: #c62828;
+}
+
+.statusMessage {
+  font-size: 1rem;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background-color: #e3f2fd; /* Light blue for general status */
+  color: #0d47a1; /* Darker blue text */
+  border: 1px solid #bbdefb;
+}
+
+.statusPending {
+  background-color: #fff9c4; /* Light yellow for pending */
+  color: #f57f17; /* Dark yellow/orange text */
+  border-color: #fff176;
+}
+
+.statusError, .statusMessageError {
+  background-color: #ffebee; /* Light red for error/rejected/banned */
+  color: #c62828; /* Dark red text */
+  border-color: #ffcdd2;
+}
+
+.noPostsMessage, .noCommentsMessage {
   text-align: center;
   color: #777;
-  padding: 1rem;
   font-style: italic;
+  padding: 24px;
+  background-color: #f9f9f9;
+  border: 1px dashed #ddd;
 }
 
-.joinButton {
-  display: inline-block;
-  padding: 0.8rem 1.5rem;
-  background-color: #27ae60;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 1.1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  margin-top: 1rem;
+.inlineLink {
+  color: #005A9C; /* Primary Color */
+  text-decoration: underline;
+  font-weight: 600;
+}
+.inlineLink:hover {
+  color: #F57C00; /* Accent Color */
+}
+
+/* Icon styles (simple inline-block for now) */
+.pageContainer svg {
+    width: 1.2em; /* Adjust size as needed */
+    height: 1.2em;
+    vertical-align: middle; /* Align with text */
+}
+
+/* Responsive adjustments (optional, can be expanded) */
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 16px;
+  }
+  .communityName {
+    font-size: 2rem; /* 32px */
+  }
+  .sectionTitle {
+    font-size: 1.5rem; /* 24px */
+  }
+  .communityMetaContainer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .postMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .button {
+    font-size: 0.95rem;
+    padding: 10px 16px;
+  }
 }
 
 .joinButton:hover {
-  background-color: #229954;
+  background-color: #008c82;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 169, 157, 0.3);
 }
 
 .joinButton:disabled {
-  background-color: #a5d6a7;
+  background-color: #99e2b4;
   cursor: not-allowed;
-}
-
-.alreadyMemberText {
-  font-style: italic;
-  color: #555;
-  margin-top: 1rem;
+  transform: none;
+  box-shadow: none;
 }
 
 .editCommunityButton {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 0.7rem 1.4rem;
-  background-color: #546e7a; /* A neutral, slightly bluish-gray */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 1rem;
+  background-color: #f1f5f9;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
   margin-top: 1rem;
-  margin-left: 0.5rem; /* Add some space if next to another button */
-  text-decoration: none; /* For Link component */
+  margin-left: 0.75rem;
+  text-decoration: none;
 }
 
 .editCommunityButton:hover {
-  background-color: #455a64;
+  background-color: #e2e8f0;
+  transform: translateY(-1px);
 }
 
-.editCommunityButton:disabled {
-  background-color: #b0bec5;
+.alreadyMemberText {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #00A99D;
+  font-weight: 500;
+  margin-top: 1rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #f0fdfa;
+  border-radius: 8px;
+  border: 1px solid #99f6e4;
+}
+
+.pendingRequestText {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f59e0b;
+  font-weight: 500;
+  margin-top: 1rem;
+  padding: 0.75rem 1.25rem;
+  background-color: #fffbeb;
+  border-radius: 8px;
+  border: 1px solid #fde68a;
+}
+
+.commentSection {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.viewCommentsButton {
+  background-color: transparent;
+  color: #3498db;
+  border: 1px solid #3498db;
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.viewCommentsButton:hover {
+  background-color: #3498db;
+  color: white;
+}
+
+.viewCommentsButton:disabled {
+  color: #ccc;
+  border-color: #ccc;
   cursor: not-allowed;
+}
+
+.commentsContainer {
+  margin-top: 0.5rem;
+  padding-left: 1rem;
+}
+
+.commentList {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1rem;
+}
+
+.commentItem {
+  padding: 0.75rem;
+  border: 1px solid #f0f0f0;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  background-color: #fcfcfc;
+}
+
+.commentAuthor {
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.commentContent {
+  font-size: 0.9rem;
+  color: #333;
+  white-space: pre-wrap;
+  margin-bottom: 0.25rem;
+}
+
+.commentTimestamp {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.noComments {
+  font-size: 0.9rem;
+  color: #777;
+  margin-bottom: 1rem;
+}
+
+.commentForm {
+  margin-top: 1rem;
+}
+
+.commentForm textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.commentForm textarea:focus {
+  outline: none;
+  border-color: #00A99D;
+  box-shadow: 0 0 0 3px rgba(0, 169, 157, 0.1);
+}
+
+.commentForm button {
+  padding: 0.5rem 1.25rem;
+  background-color: #005A9C;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.commentForm button:hover {
+  background-color: #00457a;
+  transform: translateY(-1px);
+}
+
+.manageMembersButton {
+  background-color: #78909c;
+  margin-left: 0.5rem;
+}
+
+.manageMembersButton:hover {
+  background-color: #607d8b;
 }
